@@ -1,0 +1,35 @@
+{
+  "name": "parsiux",
+  "version": "0.1.0",
+  "description": "Persian-first UI/UX intelligence and RTL audit CLI for AI coding assistants",
+  "type": "module",
+  "bin": {
+    "parsiux": "dist/src/cli.js"
+  },
+  "files": [
+    "dist",
+    "data",
+    "templates",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "scripts": {
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
+    "check": "tsc --noEmit -p tsconfig.test.json",
+    "test": "node -e \"require('fs').rmSync('.test-dist',{recursive:true,force:true})\" && tsc -p tsconfig.test.json && node --test .test-dist/tests/*.test.js",
+    "start": "node dist/src/cli.js",
+    "verify": "npm run check && npm test && npm run build",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "persian-ui", "farsi", "rtl", "ui-ux", "design-system", "tailwind-rtl", "shadcn-rtl", "ai-coding-assistant", "accessibility"
+  ],
+  "author": "Mohammad (@llllxyz)",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
