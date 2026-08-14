@@ -16,19 +16,18 @@ ParsiUX به‌جای ترجمه‌ی سطحی یک design system انگلیسی
 
 ## نصب
 
-```bash
-npm install -g parsiux
-```
-
-در حالت توسعه:
+تا زمان انتشار نخستین نسخه در npm، پروژه را مستقیم از GitHub نصب کن:
 
 ```bash
+git clone https://github.com/mamadiezad/parsiux.git
+cd parsiux
 npm install
 npm run build
-node dist/cli.js --help
+npm link
+parsiux --help
 ```
 
-Node.js 20 یا جدیدتر لازم است.
+برای استفاده بدون نصب global هم می‌توانی از `node dist/src/cli.js` استفاده کنی. Node.js 20 یا جدیدتر لازم است.
 
 ## شروع سریع
 
