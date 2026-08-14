@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="گالری الگوهای درست و غلط RTL برای رابط فارسی">
+  <title>ParsiUX Gallery — الگوهای RTL فارسی</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav shell" aria-label="ناوبری اصلی">
+      <a class="brand" href="#top" aria-label="ParsiUX Gallery">
+        <span class="mark">P</span>
+        <span>ParsiUX <b>Gallery</b></span>
+      </a>
+      <a class="repo" href="https://github.com/mamadiezad/parsiux">GitHub ↗</a>
+    </nav>
+    <section class="shell intro" id="top">
+      <p class="eyebrow">Persian-first UI patterns</p>
+      <h1>نمونه‌های درست و غلط<br><span>رابط فارسی و RTL</span></h1>
+      <p class="lead">یک گالری عملی برای دیدن خطاهایی که static lint به‌تنهایی نمی‌فهمد؛ متن مختلط، focus، قیمت، فرم و layout موبایل.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#patterns">دیدن الگوها</a>
+        <code>parsiux visual ./gallery/index.html --strict</code>
+      </div>
+    </section>
+  </header>
+
+  <main class="shell">
+    <section class="toolbar" aria-label="فیلتر الگوها">
+      <div>
+        <p class="eyebrow">Pattern library</p>
+        <h2>هر نمونه، یک مسئله‌ی واقعی</h2>
+      </div>
+      <div class="filters" role="tablist" aria-label="نمایش الگوها">
+        <button class="filter active" data-filter="all" role="tab" aria-selected="true">همه</button>
+        <button class="filter" data-filter="good" role="tab" aria-selected="false">درست</button>
+        <button class="filter" data-filter="bad" role="tab" aria-selected="false">غلط</button>
+      </div>
+    </section>
+
+    <section class="grid" id="patterns">
+      <article class="pattern-card" data-kind="good">
+        <header class="card-heading"><span class="status good">درست</span><span class="index">01</span></header>
+        <h3>قیمت، تخفیف و متن مختلط</h3>
+        <p>عدد و واحد قابل اسکن هستند و شناسه‌های لاتین جای خودشان را حفظ می‌کنند.</p>
+        <div class="demo product-good">
+          <div class="product-image">⌁</div>
+          <div class="product-info">
+            <span class="tag">ارسال رایگان</span>
+            <strong>کیف روزمره مدل M-24</strong>
+            <div class="price-row"><del><bdi dir="ltr">1,490,000</bdi> تومان</del><b><bdi dir="ltr">1,190,000</bdi> تومان</b></div>
+            <span class="stock">● موجود در انبار</span>
+          </div>
+        </div>
+        <pre><code>&lt;bdi dir="ltr"&gt;1,190,000&lt;/bdi&gt; تومان</code></pre>
+      </article>
+
+      <article class="pattern-card bad-card" data-kind="bad">
+        <header class="card-heading"><span class="status bad">غلط</span><span class="index">02</span></header>
+        <h3>عددهای چسبیده و مبهم</h3>
+        <p>واحد، تخفیف و شناسه در متن راست‌به‌چپ بدون isolation به‌هم می‌ریزند.</p>
+        <div class="demo product-bad" data-parsiux-ignore>
+          <div class="product-image">⌁</div>
+          <div class="product-info">
+            <span class="tag">ارسال رایگان</span>
+            <strong>کیف روزمره مدل M-24</strong>
+            <div class="bad-price">1,190,000تومان <small>کد: M-24-IR</small></div>
+            <span class="stock muted">موجود</span>
+          </div>
+        </div>
+        <pre><code>1,190,000تومان کد:M-24-IR</code></pre>
+      </article>
+
+      <article class="pattern-card" data-kind="good">
+        <header class="card-heading"><span class="status good">درست</span><span class="index">03</span></header>
+        <h3>فیلترهای قابل wrap در موبایل</h3>
+        <p>chipها در عرض کم می‌شکنند و action بازنشانی همیشه قابل دسترس می‌ماند.</p>
+        <div class="demo filters-good">
+          <div class="filter-head"><strong>فیلترهای فعال</strong><button>پاک کردن همه</button></div>
+          <div class="chip-list"><button class="chip">رنگ: مشکی <i>×</i></button><button class="chip">سایز: متوسط <i>×</i></button><button class="chip">ارسال فوری <i>×</i></button></div>
+        </div>
+        <pre><code>display: flex; flex-wrap: wrap;
+gap: .5rem;</code></pre>
+      </article>
+
+      <article class="pattern-card bad-card" data-kind="bad">
+        <header class="card-heading"><span class="status bad">غلط</span><span class="index">04</span></header>
+        <h3>فیلترهای بریده‌شده</h3>
+        <p>ردیف ثابت در صفحه‌ی کوچک، اطلاعات و actionها را از دید خارج می‌کند.</p>
+        <div class="demo filters-bad" data-parsiux-ignore>
+          <div class="filter-head"><strong>فیلترهای فعال</strong><button>پاک کردن همه</button></div>
+          <div class="bad-chip-row"><button>رنگ: مشکی ×</button><button>سایز: متوسط ×</button><button>ارسال فوری ×</button></div>
+        </div>
+        <pre><code>white-space: nowrap;
+overflow: hidden;</code></pre>
+      </article>
+
+      <article class="pattern-card" data-kind="good">
+        <header class="card-heading"><span class="status good">درست</span><span class="index">05</span></header>
+        <h3>focus واضح و هدف لمسی</h3>
+        <p>کاربر کیبورد و موبایل می‌فهمد الان کجاست و می‌تواند action را با اطمینان لمس کند.</p>
+        <div class="demo focus-good">
+          <label for="email-good">ایمیل برای دریافت رسید</label>
+          <input id="email-good" value="mohammad@example.com" dir="ltr">
+          <button class="focus-demo">ثبت سفارش</button>
+        </div>
+        <pre><code>:focus-visible { outline: 3px solid #f79009; }
+min-height: 44px;</code></pre>
+      </article>
+
+      <article class="pattern-card bad-card" data-kind="bad">
+        <header class="card-heading"><span class="status bad">غلط</span><span class="index">06</span></header>
+        <h3>فرم بدون context</h3>
+        <p>label مبهم، کنترل ریز و نبود focus واضح، خطا را برای همه بیشتر می‌کند.</p>
+        <div class="demo focus-bad" data-parsiux-ignore>
+          <label for="email-bad">ایمیل</label>
+          <input id="email-bad" value="mohammad@example.com">
+          <button>ثبت</button>
+        </div>
+        <pre><code>outline: none;
+height: 28px;</code></pre>
+      </article>
+
+      <article class="pattern-card" data-kind="good">
+        <header class="card-heading"><span class="status good">درست</span><span class="index">07</span></header>
+        <h3>جدول responsive با اولویت اطلاعات</h3>
+        <p>ستون‌های مهم حفظ شده‌اند و جزئیات ثانویه به ساختار قابل خواندن منتقل می‌شوند.</p>
+        <div class="demo order-good">
+          <div class="order-row"><div><span class="order-title">سفارش <bdi dir="ltr">#A-10482</bdi></span><small>امروز، ۱۴:۳۲ · ارسال پست</small></div><strong><bdi dir="ltr">890,000</bdi> تومان</strong><span class="state success">تحویل شد</span></div>
+          <div class="order-row"><div><span class="order-title">سفارش <bdi dir="ltr">#A-10481</bdi></span><small>دیروز، ۱۸:۰۵ · ارسال پیک</small></div><strong><bdi dir="ltr">1,240,000</bdi> تومان</strong><span class="state wait">در حال ارسال</span></div>
+        </div>
+        <pre><code>grid-template-columns: 1fr auto;
+status { grid-column: 1 / -1; }</code></pre>
+      </article>
+
+      <article class="pattern-card bad-card" data-kind="bad">
+        <header class="card-heading"><span class="status bad">غلط</span><span class="index">08</span></header>
+        <h3>جدول فشرده‌ی دسکتاپ روی موبایل</h3>
+        <p>ستون‌های زیاد بدون اولویت‌بندی، صفحه را به اسکرول افقی تبدیل می‌کنند.</p>
+        <div class="demo order-bad" data-parsiux-ignore><div class="bad-table"><span>شماره سفارش</span><span>تاریخ ثبت</span><span>روش ارسال</span><span>مبلغ</span><span>وضعیت</span><bdi dir="ltr">#A-10482</bdi><span>۱۴۰۵/۰۵/۲۳</span><span>پست پیشتاز</span><span>890,000</span><span>تحویل شد</span></div></div>
+        <pre><code>min-width: 820px;
+overflow-x: auto;</code></pre>
+      </article>
+    </section>
+
+    <section class="workflow">
+      <div><p class="eyebrow">Visual regression</p><h2>این گالری را baseline کن</h2><p>هر تغییر در patternها را با screenshot و pixel diff در CI کنترل کن.</p></div>
+      <div class="workflow-code"><code>parsiux baseline ./gallery/index.html --name rtl-gallery</code><code>parsiux compare ./gallery/index.html --baseline .parsiux/baselines/rtl-gallery --strict</code></div>
+    </section>
+  </main>
+
+  <footer class="shell footer"><span>ParsiUX Gallery · ساخته‌شده برای رابط فارسیِ قابل استفاده</span><a href="https://t.me/llllxyz">Made ❤️ by Mohammad · @llllxyz</a></footer>
+  <script src="app.js"></script>
+</body>
+</html>

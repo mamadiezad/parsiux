@@ -23,8 +23,12 @@
   },
   "keywords": [
     "persian-ui",
+    "persian-ux",
     "farsi",
     "rtl",
+    "rtl-audit",
+    "visual-regression",
+    "playwright",
     "ui-ux",
     "design-system",
     "tailwind-rtl",
@@ -38,9 +42,12 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/pngjs": "^6.0.5",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "playwright": "^1.62.1"
+    "pixelmatch": "^7.2.0",
+    "playwright": "^1.62.1",
+    "pngjs": "^7.0.0"
   }
 }

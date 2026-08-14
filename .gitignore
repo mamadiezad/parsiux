@@ -7,3 +7,4 @@ coverage/
 *.log
 design-system/
 parsiux-visual-report/
+parsiux-regression-report/

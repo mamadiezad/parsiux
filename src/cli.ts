@@ -6,6 +6,7 @@ import { installSkill } from "./lib/init.js";
 import { loadCatalog } from "./lib/catalog.js";
 import { searchProducts } from "./lib/search.js";
 import { parseViewports, visualAudit, visualMarkdown } from "./lib/visual.js";
+import { compareBaseline, createBaseline, regressionMarkdown } from "./lib/regression.js";
 
 type Parsed = { command: string; positionals: string[]; options: Record<string, string | boolean> };
 
@@ -35,7 +36,7 @@ function stringOption(options: Record<string, string | boolean>, name: string, f
 }
 
 function help(): string {
-  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n  parsiux visual https://example.com --output ./parsiux-visual-report --viewports 375,768,1440 [--strict]\n\nبرای visual audit یک‌بار Chromium را نصب کن: npx playwright install chromium\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
+  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n  parsiux visual https://example.com --output ./parsiux-visual-report --viewports 375,768,1440 [--strict]\n  parsiux baseline https://example.com --name homepage --output .parsiux/baselines\n  parsiux compare https://example.com --baseline .parsiux/baselines/homepage --output ./parsiux-regression-report --strict\n\nبرای visual audit یک‌بار Chromium را نصب کن: npx playwright install chromium\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
 }
 
 async function run(): Promise<void> {
@@ -94,6 +95,38 @@ async function run(): Promise<void> {
     process.stderr.write(`گزارش و screenshotها در ${report.outputDirectory} ساخته شدند.\n`);
     process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : visualMarkdown(report));
     if (parsed.options.strict && (report.summary.error > 0 || report.summary.warning > 0)) process.exitCode = 1;
+    return;
+  }
+  if (parsed.command === "baseline") {
+    const target = parsed.positionals[0];
+    const name = stringOption(parsed.options, "name");
+    if (!target || !name) throw new Error("برای baseline یک URL یا مسیر و --name وارد کنید.");
+    const timeoutValue = Number(stringOption(parsed.options, "timeout", "15000"));
+    const baseline = await createBaseline(target, name, {
+      outputDirectory: stringOption(parsed.options, "output"),
+      force: parsed.options.force === true,
+      viewports: parseViewports(stringOption(parsed.options, "viewports")),
+      timeout: Number.isFinite(timeoutValue) ? timeoutValue : 15000
+    });
+    process.stderr.write(`baseline در ${baseline.directory} ساخته شد.\n`);
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(baseline, null, 2)}\n` : visualMarkdown(baseline.report));
+    if (parsed.options.strict && (baseline.report.summary.error > 0 || baseline.report.summary.warning > 0)) process.exitCode = 1;
+    return;
+  }
+  if (parsed.command === "compare") {
+    const target = parsed.positionals[0];
+    const baseline = stringOption(parsed.options, "baseline");
+    if (!target || !baseline) throw new Error("برای compare یک URL یا مسیر و --baseline وارد کنید.");
+    const maxDifference = Number(stringOption(parsed.options, "max-diff", "0.01"));
+    const timeoutValue = Number(stringOption(parsed.options, "timeout", "15000"));
+    const report = await compareBaseline(target, baseline, {
+      outputDirectory: stringOption(parsed.options, "output"),
+      maxDifference: Number.isFinite(maxDifference) ? maxDifference : 0.01,
+      timeout: Number.isFinite(timeoutValue) ? timeoutValue : 15000
+    });
+    process.stderr.write(`گزارش regression در ${report.outputDirectory} ساخته شد.\n`);
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : regressionMarkdown(report));
+    if (parsed.options.strict && (!report.pass || report.visualReport.summary.error > 0 || report.visualReport.summary.warning > 0)) process.exitCode = 1;
     return;
   }
   throw new Error(`دستور ناشناخته است: ${parsed.command}\n\n${help()}`);

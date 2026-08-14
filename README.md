@@ -96,6 +96,42 @@ parsiux visual ./preview/index.html --viewports 375,768,1440 --strict
 
 خروجی شامل `report.fa.md`، `report.json` و screenshot هر viewport است. دستور visual مواردی مثل scroll افقی واقعی، جهت و زبان سند، فونت فارسی، هدف‌های لمسی کوچک، focus نامرئی، متن مختلط bidi و کنتراست مشکوک را گزارش می‌دهد.
 
+### Baseline و Visual Regression
+
+وقتی یک صفحه از نظر طراحی تأیید شد، از آن baseline بگیر:
+
+```bash
+parsiux baseline http://localhost:3000 \
+  --name homepage \
+  --output .parsiux/baselines
+```
+
+در CI یا پیش از merge، نسخه‌ی جدید را با baseline مقایسه کن:
+
+```bash
+parsiux compare http://localhost:3000 \
+  --baseline .parsiux/baselines/homepage \
+  --output ./parsiux-regression-report \
+  --max-diff 0.01 \
+  --strict
+```
+
+`max-diff` نسبت پیکسل‌های تغییرکرده است؛ مقدار پیش‌فرض `0.01` یعنی ۱٪. گزارش compare تصویر فعلی، تصویر diff، نسبت تغییر هر viewport و نتیجه‌ی PASS یا FAIL را می‌سازد. برای جایگزین کردن baseline از `--force` استفاده کن.
+
+## RTL Gallery
+
+مسیر [gallery/](gallery/) یک گالری فارسی و بدون وابستگی بیرونی است که نمونه‌های درست و غلط RTL را کنار هم نشان می‌دهد: مبلغ و bidi، filter chipهای موبایل، focus و target لمسی، فرم، order list و جدول responsive.
+
+![ParsiUX RTL Gallery](gallery/preview.png)
+
+```bash
+parsiux visual ./gallery/index.html --strict
+parsiux baseline ./gallery/index.html --name rtl-gallery
+parsiux compare ./gallery/index.html --baseline .parsiux/baselines/rtl-gallery --strict
+```
+
+نمونه‌های «غلط» داخل گالری عمداً با `data-parsiux-ignore` از runtime audit کنار گذاشته شده‌اند تا خود گالری بتواند baseline سالم داشته باشد؛ آن‌ها برای مقایسه‌ی دیداری و آموزش هستند، نه الگوی پیاده‌سازی.
+
 ## نمونه‌ی خروجی Audit
 
 ParsiUX مواردی مثل این‌ها را پیدا می‌کند:
@@ -162,10 +198,10 @@ npm run verify
 
 ## مسیر توسعه
 
-- visual regression و baseline تصویری برای صفحه‌های واقعی RTL
+- baseline approval workflow برای PRها و نگه‌داری screenshotهای تأییدشده
 - rule packهای پرداخت، فروشگاه، محتوای فارسی و فرم‌های محلی
 - adapterهای Nuxt، Flutter و React Native
-- gallery نمونه‌های درست و غلط RTL
+- galleryهای contribution-ready برای کامپوننت‌های بیشتر
 - corpus عمومی برای سنجش کیفیت جست‌وجوی فارسی
 
 ## ریشه و شفافیت

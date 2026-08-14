@@ -74,6 +74,7 @@ async function inspectPage(page: Page): Promise<Finding[]> {
       const rect = element.getBoundingClientRect();
       return style.display !== "none" && style.visibility !== "hidden" && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
     };
+    const ignored = (element: Element) => Boolean(element.closest("[data-parsiux-ignore]"));
     const rgb = (value: string): [number, number, number] | undefined => {
       const match = value.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/i);
       if (!match || (match[4] !== undefined && Number(match[4]) === 0)) return undefined;
@@ -117,7 +118,7 @@ async function inspectPage(page: Page): Promise<Finding[]> {
     }
     const bodyFont = window.getComputedStyle(document.body).fontFamily.toLowerCase();
     if (!/vazirmatn|estedad|shabnam|sahel|iransans|noto sans arabic/.test(bodyFont)) add("visual-persian-font", "warning", "فونت فارسی قابل تشخیص نیست", `font-family فعلی body: ${bodyFont || "نامشخص"}`, "یک فونت فارسی با وزن‌های واقعی و fallback مناسب روی body اعمال کن.");
-    const interactive = [...document.querySelectorAll("a[href], button, input, select, textarea, [role=button], [tabindex]")].filter(visible).slice(0, 80) as HTMLElement[];
+    const interactive = [...document.querySelectorAll("a[href], button, input, select, textarea, [role=button], [tabindex]")].filter(visible).filter((element) => !ignored(element)).slice(0, 80) as HTMLElement[];
     if (!interactive.length) add("visual-no-interaction", "info", "تعامل قابل بررسی نیست", "هیچ عنصر interactive قابل مشاهده‌ای در صفحه پیدا نشد.", "اگر صفحه باید actionable باشد، تعامل‌های اصلی را در audit بعدی بررسی کن.");
     let focusFailures = 0;
     interactive.forEach((element) => {
@@ -133,6 +134,7 @@ async function inspectPage(page: Page): Promise<Finding[]> {
     if (interactive.length && focusFailures === interactive.length) add("visual-focus-style", "warning", "focus قابل مشاهده تشخیص داده نشد", "تغییر قابل مشاهده‌ای در style عنصرهای interactive پس از focus دیده نشد.", "برای :focus-visible outline یا ring با کنتراست مناسب تعریف کن.");
     const mixedCandidates = [...document.querySelectorAll("p, span, div, td, th, label, button, a")]
       .filter(visible)
+      .filter((element) => !ignored(element))
       .map((element) => ({ element, text: (element.textContent || "").trim() }))
       .filter(({ text }) => /[\u0600-\u06FF]/.test(text) && /(?:https?:\/\/|www\.|\b\d{8,}\b|\b[A-Za-z]{2,}[/:._-][A-Za-z0-9/:._-]+)/.test(text))
       .slice(0, 5);
@@ -142,7 +144,7 @@ async function inspectPage(page: Page): Promise<Finding[]> {
       if (direction !== "ltr" && bidi === "normal") add(`visual-mixed-bidi-${index}`, "warning", "متن مختلط نیازمند بررسی bidi است", `متن فارسی همراه با شناسه، شماره یا URL پیدا شد: «${text.slice(0, 72)}»`, "بخش‌های LTR را با bdi، dir=ltr یا unicode-bidi:isolate از متن فارسی جدا کن.");
     });
     let lowContrast = 0;
-    [...document.querySelectorAll("p, span, a, button, label, li, td, th, h1, h2, h3, h4, h5, h6")].filter(visible).forEach((element) => {
+    [...document.querySelectorAll("p, span, a, button, label, li, td, th, h1, h2, h3, h4, h5, h6")].filter(visible).filter((element) => !ignored(element)).forEach((element) => {
       if (lowContrast >= 4 || !(element.textContent || "").trim()) return;
       const style = window.getComputedStyle(element);
       const foreground = rgb(style.color);
