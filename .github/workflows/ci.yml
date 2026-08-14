@@ -12,6 +12,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,7 +23,7 @@ jobs:
       - run: npm run verify
       - run: node dist/src/cli.js design "فروشگاه اینترنتی" --stack nextjs --output .
       - run: node dist/src/cli.js audit .
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: node dist/src/cli.js visual tests/fixtures/rtl-good.html --output /tmp/parsiux-visual-report --strict
       - run: node dist/src/cli.js visual gallery/index.html --output /tmp/parsiux-gallery-report --strict
       - run: node dist/src/cli.js baseline tests/fixtures/rtl-good.html --name ci-fixture --output /tmp/parsiux-baselines
