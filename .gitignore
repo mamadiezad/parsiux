@@ -6,3 +6,4 @@ coverage/
 .env
 *.log
 design-system/
+parsiux-visual-report/

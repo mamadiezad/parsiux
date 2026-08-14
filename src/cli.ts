@@ -5,6 +5,7 @@ import { createDesign, designMarkdown, persistDesign } from "./lib/design.js";
 import { installSkill } from "./lib/init.js";
 import { loadCatalog } from "./lib/catalog.js";
 import { searchProducts } from "./lib/search.js";
+import { parseViewports, visualAudit, visualMarkdown } from "./lib/visual.js";
 
 type Parsed = { command: string; positionals: string[]; options: Record<string, string | boolean> };
 
@@ -34,7 +35,7 @@ function stringOption(options: Record<string, string | boolean>, name: string, f
 }
 
 function help(): string {
-  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
+  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n  parsiux visual https://example.com --output ./parsiux-visual-report --viewports 375,768,1440 [--strict]\n\nبرای visual audit یک‌بار Chromium را نصب کن: npx playwright install chromium\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
 }
 
 async function run(): Promise<void> {
@@ -78,6 +79,20 @@ async function run(): Promise<void> {
     const target = parsed.positionals[0] ?? ".";
     const report = await auditPath(target);
     process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : auditMarkdown(report));
+    if (parsed.options.strict && (report.summary.error > 0 || report.summary.warning > 0)) process.exitCode = 1;
+    return;
+  }
+  if (parsed.command === "visual") {
+    const target = parsed.positionals[0];
+    if (!target) throw new Error("برای visual یک URL یا مسیر فایل HTML وارد کنید.");
+    const timeoutValue = Number(stringOption(parsed.options, "timeout", "15000"));
+    const report = await visualAudit(target, {
+      outputDirectory: stringOption(parsed.options, "output"),
+      viewports: parseViewports(stringOption(parsed.options, "viewports")),
+      timeout: Number.isFinite(timeoutValue) ? timeoutValue : 15000
+    });
+    process.stderr.write(`گزارش و screenshotها در ${report.outputDirectory} ساخته شدند.\n`);
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : visualMarkdown(report));
     if (parsed.options.strict && (report.summary.error > 0 || report.summary.warning > 0)) process.exitCode = 1;
     return;
   }

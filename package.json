@@ -22,7 +22,15 @@
     "prepack": "npm run build"
   },
   "keywords": [
-    "persian-ui", "farsi", "rtl", "ui-ux", "design-system", "tailwind-rtl", "shadcn-rtl", "ai-coding-assistant", "accessibility"
+    "persian-ui",
+    "farsi",
+    "rtl",
+    "ui-ux",
+    "design-system",
+    "tailwind-rtl",
+    "shadcn-rtl",
+    "ai-coding-assistant",
+    "accessibility"
   ],
   "author": "Mohammad (@llllxyz)",
   "engines": {
@@ -31,5 +39,8 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "playwright": "^1.62.1"
   }
 }

@@ -63,7 +63,7 @@ design-system/فروشگاه-پوشاک/
 └── tokens.json
 ```
 
-### بررسی RTL پروژه
+### بررسی static RTL پروژه
 
 ```bash
 parsiux audit .
@@ -72,6 +72,29 @@ parsiux audit . --json
 ```
 
 حالت `--strict` در صورت وجود error یا warning با exit code غیر صفر تمام می‌شود و برای CI مناسب است.
+
+### Visual RTL Audit با screenshot واقعی
+
+Visual Audit صفحه را در مرورگر Chromium و سه viewport موبایل، تبلت و دسکتاپ باز می‌کند، screenshot می‌گیرد و وضعیت واقعی layout را بررسی می‌کند.
+
+```bash
+npx playwright install chromium
+parsiux visual http://localhost:3000 --output ./parsiux-visual-report
+```
+
+روی Linux اگر Chromium به‌خاطر libraryهای سیستم اجرا نشد، یک‌بار این دستور را اجرا کن:
+
+```bash
+npx playwright install --with-deps chromium
+```
+
+برای بررسی یک فایل HTML محلی:
+
+```bash
+parsiux visual ./preview/index.html --viewports 375,768,1440 --strict
+```
+
+خروجی شامل `report.fa.md`، `report.json` و screenshot هر viewport است. دستور visual مواردی مثل scroll افقی واقعی، جهت و زبان سند، فونت فارسی، هدف‌های لمسی کوچک، focus نامرئی، متن مختلط bidi و کنتراست مشکوک را گزارش می‌دهد.
 
 ## نمونه‌ی خروجی Audit
 
@@ -116,6 +139,18 @@ ParsiUX مواردی مثل این‌ها را پیدا می‌کند:
 
 این دیتاست عمداً کوچک اما قابل بررسی شروع شده است. هر entry باید problem، goal، component، copy rule، anti-pattern و audit hint مشخص داشته باشد؛ فقط اضافه‌کردن لیست رنگ یا اسم یک UI style کافی نیست.
 
+## Docker
+
+image پروژه Chromium لازم برای Visual Audit را هم دارد:
+
+```bash
+docker build -t parsiux .
+docker run --rm -v "$PWD:/workspace" parsiux audit /workspace
+docker run --rm -v "$PWD:/workspace" parsiux visual /workspace/preview/index.html --output /workspace/parsiux-visual-report
+```
+
+برای audit یک dev server از داخل Docker، URL قابل دسترس از کانتینر را بده؛ مثلاً روی macOS و Windows معمولاً `http://host.docker.internal:3000`.
+
 ## توسعه
 
 ```bash
@@ -127,7 +162,7 @@ npm run verify
 
 ## مسیر توسعه
 
-- افزونه‌ی Playwright برای visual RTL audit در 375، 768 و 1440 پیکسل
+- visual regression و baseline تصویری برای صفحه‌های واقعی RTL
 - rule packهای پرداخت، فروشگاه، محتوای فارسی و فرم‌های محلی
 - adapterهای Nuxt، Flutter و React Native
 - gallery نمونه‌های درست و غلط RTL

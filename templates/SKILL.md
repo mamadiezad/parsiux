@@ -9,6 +9,7 @@
 5. در layout از logical CSS استفاده کن: `margin-inline`، `padding-inline`، `inset-inline-start/end` و `text-align:start/end`.
 6. برای متن فارسی، متن مختلط، قیمت، شماره، URL و کد مسیر bidi و overflow را بررسی کن.
 7. بعد از پیاده‌سازی اجرا کن: `parsiux audit .`
-8. نتیجه‌ی audit را رفع کن و سپس در عرض‌های 375، 768 و 1440 پیکسل بازبینی کن.
+8. اگر صفحه در مرورگر یا dev server قابل اجراست، یک‌بار Chromium را با `npx playwright install chromium` آماده کن و سپس اجرا کن: `parsiux visual http://localhost:3000 --strict`.
+9. نتیجه‌ی audit را رفع کن و screenshotهای 375، 768 و 1440 پیکسل را بازبینی کن.
 
 اولویت‌ها: خوانایی فارسی، اقدام واضح، دسترس‌پذیری، responsive text، focus state، کنتراست و reduced motion.
