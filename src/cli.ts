@@ -7,6 +7,10 @@ import { loadCatalog } from "./lib/catalog.js";
 import { searchProducts } from "./lib/search.js";
 import { parseViewports, visualAudit, visualMarkdown } from "./lib/visual.js";
 import { compareBaseline, createBaseline, regressionMarkdown } from "./lib/regression.js";
+import { createGuardianSetup, loadGuardianConfig } from "./lib/guardian-config.js";
+import { githubAnnotations, gateMarkdown, runGate, writeGitHubSummary } from "./lib/gate.js";
+import { listProfiles, profilesMarkdown } from "./lib/profiles.js";
+import { fixMarkdown, safeRtlFix } from "./lib/fix.js";
 
 type Parsed = { command: string; positionals: string[]; options: Record<string, string | boolean> };
 
@@ -36,7 +40,7 @@ function stringOption(options: Record<string, string | boolean>, name: string, f
 }
 
 function help(): string {
-  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n  parsiux visual https://example.com --output ./parsiux-visual-report --viewports 375,768,1440 [--strict]\n  parsiux baseline https://example.com --name homepage --output .parsiux/baselines\n  parsiux compare https://example.com --baseline .parsiux/baselines/homepage --output ./parsiux-regression-report --strict\n\nبرای visual audit یک‌بار Chromium را نصب کن: npx playwright install chromium\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
+  return `ParsiUX — Persian-first UI/UX intelligence and RTL audit\n\nدستورها:\n  parsiux init --ai claude|cursor|universal|all --target .\n  parsiux init --ci --target .\n  parsiux profiles\n  parsiux search "فروشگاه پرداخت" [--max 5] [--json]\n  parsiux design "فروشگاه پوشاک" --stack nextjs --name "فروشگاه من" --output .\n  parsiux audit . [--json] [--strict]\n  parsiux fix . [--apply]\n  parsiux visual https://example.com --output ./parsiux-visual-report --viewports 375,768,1440 [--strict]\n  parsiux baseline https://example.com --name homepage --output .parsiux/baselines\n  parsiux compare https://example.com --baseline .parsiux/baselines/homepage --output ./parsiux-regression-report --strict\n  parsiux gate --config parsiux.config.json [--github] [--strict]\n\nبرای visual audit یک‌بار Chromium را نصب کن: npx playwright install chromium\nParsiUX ساخته شده برای رابط فارسی، RTL و AI coding assistantها.\nMade ❤️ by Mohammad — @llllxyz\n`;
 }
 
 async function run(): Promise<void> {
@@ -46,10 +50,20 @@ async function run(): Promise<void> {
     return;
   }
   if (parsed.command === "init") {
-    const assistant = stringOption(parsed.options, "ai", "universal") as string;
     const target = stringOption(parsed.options, "target", ".") as string;
+    if (parsed.options.ci === true) {
+      const setup = await createGuardianSetup(target, { force: parsed.options.force === true });
+      process.stdout.write(`ParsiUX Guardian CI آماده شد:\n- ${setup.config}\n- ${setup.workflow}\n`);
+      return;
+    }
+    const assistant = stringOption(parsed.options, "ai", "universal") as string;
     const files = await installSkill(target, assistant);
     process.stdout.write(`ParsiUX skill نصب شد:\n${files.map((file) => `- ${file}`).join("\n")}\n`);
+    return;
+  }
+  if (parsed.command === "profiles") {
+    const profiles = await listProfiles();
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(profiles, null, 2)}\n` : profilesMarkdown(profiles));
     return;
   }
   if (parsed.command === "search") {
@@ -81,6 +95,12 @@ async function run(): Promise<void> {
     const report = await auditPath(target);
     process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : auditMarkdown(report));
     if (parsed.options.strict && (report.summary.error > 0 || report.summary.warning > 0)) process.exitCode = 1;
+    return;
+  }
+  if (parsed.command === "fix") {
+    const target = parsed.positionals[0] ?? ".";
+    const report = await safeRtlFix(target, parsed.options.apply === true);
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : fixMarkdown(report));
     return;
   }
   if (parsed.command === "visual") {
@@ -127,6 +147,31 @@ async function run(): Promise<void> {
     process.stderr.write(`گزارش regression در ${report.outputDirectory} ساخته شد.\n`);
     process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : regressionMarkdown(report));
     if (parsed.options.strict && (!report.pass || report.visualReport.summary.error > 0 || report.visualReport.summary.warning > 0)) process.exitCode = 1;
+    return;
+  }
+  if (parsed.command === "gate") {
+    const loaded = await loadGuardianConfig(stringOption(parsed.options, "config"));
+    const config = { ...loaded.config };
+    const profile = stringOption(parsed.options, "profile");
+    const staticTarget = stringOption(parsed.options, "static-target");
+    const visualTarget = stringOption(parsed.options, "target");
+    const baseline = stringOption(parsed.options, "baseline");
+    const output = stringOption(parsed.options, "output");
+    const maxDifference = Number(stringOption(parsed.options, "max-diff", String(config.maxDifference)));
+    if (profile) config.profile = profile;
+    if (staticTarget) config.staticTarget = resolve(staticTarget);
+    if (visualTarget) config.visualTarget = /^https?:\/\//i.test(visualTarget) || /^file:\/\//i.test(visualTarget) ? visualTarget : resolve(visualTarget);
+    if (baseline) config.baseline = resolve(baseline);
+    if (output) config.output = resolve(output);
+    if (Number.isFinite(maxDifference)) config.maxDifference = maxDifference;
+    const report = await runGate(config);
+    process.stderr.write(`گزارش Guardian در ${config.output} ساخته شد.\n`);
+    if (parsed.options.github === true) {
+      githubAnnotations(report).forEach((annotation) => process.stdout.write(`${annotation}\n`));
+      await writeGitHubSummary(report);
+    }
+    process.stdout.write(parsed.options.json ? `${JSON.stringify(report, null, 2)}\n` : gateMarkdown(report));
+    if (parsed.options.strict && (report.summary.error > 0 || report.summary.warning > 0)) process.exitCode = 1;
     return;
   }
   throw new Error(`دستور ناشناخته است: ${parsed.command}\n\n${help()}`);

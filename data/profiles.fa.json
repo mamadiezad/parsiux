@@ -1,0 +1,41 @@
+{
+  "version": "0.1.0",
+  "profiles": [
+    {
+      "id": "base-fa",
+      "title": "رابط فارسی پایه",
+      "description": "قواعد ضروری برای متن فارسی، RTL، bidi، logical CSS و دسترس‌پذیری پایه.",
+      "checks": ["character-normalization", "money-spacing", "rtl-root", "logical-css", "visual-rtl"]
+    },
+    {
+      "id": "ecommerce-fa",
+      "title": "فروشگاه فارسی",
+      "description": "پروفایل خرید، قیمت، تخفیف، موجودی، فیلتر موبایل و checkout.",
+      "checks": ["character-normalization", "money-spacing", "rtl-root", "logical-css", "visual-rtl", "visual-regression", "commerce-copy"]
+    },
+    {
+      "id": "fintech-fa",
+      "title": "پرداخت و فین‌تک",
+      "description": "تمرکز روی مبلغ، شناسه، داده‌ی حساس، bidi و تأیید تراکنش.",
+      "checks": ["character-normalization", "money-spacing", "bidi-sensitive", "rtl-root", "logical-css", "visual-rtl", "visual-regression"]
+    },
+    {
+      "id": "booking-fa",
+      "title": "رزرو و نوبت‌دهی",
+      "description": "تمرکز روی زمان، ظرفیت، فرم، موبایل و مسیر تغییر یا لغو رزرو.",
+      "checks": ["character-normalization", "form-labels", "rtl-root", "logical-css", "visual-rtl", "visual-regression"]
+    },
+    {
+      "id": "dashboard-fa",
+      "title": "داشبورد فارسی",
+      "description": "تمرکز روی جدول RTL، KPI، فیلتر، عدد، وضعیت و responsive layout.",
+      "checks": ["character-normalization", "money-spacing", "rtl-root", "logical-css", "visual-rtl", "visual-regression", "table-mobile"]
+    },
+    {
+      "id": "healthcare-fa",
+      "title": "سلامت و کلینیک",
+      "description": "تمرکز روی فرم‌های حساس، consent، خطای قابل فهم و حریم خصوصی.",
+      "checks": ["character-normalization", "form-labels", "rtl-root", "logical-css", "visual-rtl", "visual-regression", "sensitive-copy"]
+    }
+  ]
+}

@@ -12,6 +12,8 @@
 8. اگر صفحه در مرورگر یا dev server قابل اجراست، یک‌بار Chromium را با `npx playwright install chromium` آماده کن و سپس اجرا کن: `parsiux visual http://localhost:3000 --strict`.
 9. پس از تأیید خروجی پایدار، baseline بساز: `parsiux baseline http://localhost:3000 --name homepage`.
 10. قبل از merge تغییرات بصری، اجرا کن: `parsiux compare http://localhost:3000 --baseline .parsiux/baselines/homepage --strict`.
-11. نتیجه‌ی audit را رفع کن و screenshotهای 375، 768 و 1440 پیکسل را بازبینی کن.
+11. برای جمع‌بندی کنترل کیفیت، `parsiux gate --config parsiux.config.json --strict` را اجرا کن.
+12. برای اصلاح‌های RTL کم‌خطر ابتدا `parsiux fix .` را ببین و فقط پس از review از `--apply` استفاده کن.
+13. نتیجه‌ی audit را رفع کن و screenshotهای 375، 768 و 1440 پیکسل را بازبینی کن.
 
 اولویت‌ها: خوانایی فارسی، اقدام واضح، دسترس‌پذیری، responsive text، focus state، کنتراست و reduced motion.

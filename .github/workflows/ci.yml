@@ -25,6 +25,7 @@ jobs:
       - run: node dist/src/cli.js audit .
       - run: npx playwright install chromium
       - run: node dist/src/cli.js visual tests/fixtures/rtl-good.html --output /tmp/parsiux-visual-report --strict
+      - run: node dist/src/cli.js gate --config tests/fixtures/guardian.config.json --github --strict
       - run: node dist/src/cli.js visual gallery/index.html --output /tmp/parsiux-gallery-report --strict
       - run: node dist/src/cli.js baseline tests/fixtures/rtl-good.html --name ci-fixture --output /tmp/parsiux-baselines
       - run: node dist/src/cli.js compare tests/fixtures/rtl-good.html --baseline /tmp/parsiux-baselines/ci-fixture --output /tmp/parsiux-regression-report --strict

@@ -1,0 +1,7 @@
+{
+  "profile": "base-fa",
+  "staticTarget": ".",
+  "visualTarget": "rtl-good.html",
+  "output": "/tmp/parsiux-guardian-report",
+  "maxDifference": 0.01
+}

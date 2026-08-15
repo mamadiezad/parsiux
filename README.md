@@ -1,8 +1,8 @@
 # ParsiUX
 
-**موتور تصمیم‌یار UI/UX فارسی و ابزار RTL Audit برای AI coding assistantها**
+**موتور تصمیم‌یار UI/UX فارسی، RTL Quality Gate و ابزار Visual Regression برای AI coding assistantها**
 
-ParsiUX به‌جای ترجمه‌ی سطحی یک design system انگلیسی، برای ساخت رابط فارسی طراحی شده است: از انتخاب الگوی محصول و فونت تا تولید token و پیدا کردن ایرادهای RTL پیش از انتشار.
+ParsiUX به‌جای ترجمه‌ی سطحی یک design system انگلیسی، برای ساخت و کنترل کیفیت رابط فارسی طراحی شده است: از انتخاب الگوی محصول و فونت تا تولید token، پیدا کردن ایراد RTL، screenshot واقعی و جلوگیری از regression پیش از merge.
 
 > مناسب Next.js، React، Tailwind CSS و shadcn/ui. قابل استفاده کنار Claude Code، Cursor و Agentهای استاندارد.
 
@@ -12,6 +12,9 @@ ParsiUX به‌جای ترجمه‌ی سطحی یک design system انگلیسی
 - پیشنهاد ساختار، رنگ، تایپوگرافی، کامپوننت و anti-pattern برای محصول‌های مختلف
 - تولید `MASTER.fa.md` و `tokens.json` برای هر پروژه
 - بررسی خودکار RTL: جهت صفحه، زبان، فونت فارسی، propertyهای منطقی CSS، کلاس‌های فیزیکی Tailwind و خطرهای overflow
+- Visual Audit و Visual Regression با Playwright، screenshot و pixel diff
+- Guardian Quality Gate برای اجرای یکپارچه‌ی static audit، runtime audit، profile فارسی و baseline در CI
+- rule packهای قابل انتخاب برای رابط پایه، فروشگاه، فین‌تک، رزرو، داشبورد و سلامت
 - راهنمای عملی برای متن مختلط، مبلغ، شماره، URL، دسترس‌پذیری و responsive text
 
 ## نصب
@@ -118,6 +121,72 @@ parsiux compare http://localhost:3000 \
 
 `max-diff` نسبت پیکسل‌های تغییرکرده است؛ مقدار پیش‌فرض `0.01` یعنی ۱٪. گزارش compare تصویر فعلی، تصویر diff، نسبت تغییر هر viewport و نتیجه‌ی PASS یا FAIL را می‌سازد. برای جایگزین کردن baseline از `--force` استفاده کن.
 
+## ParsiUX Guardian
+
+Guardian لایه‌ی نهایی کنترل کیفیت است. یک گزارش واحد می‌سازد و static RTL audit، Persian readiness rules، Visual Audit و در صورت وجود baseline، Visual Regression را کنار هم اجرا می‌کند.
+
+```bash
+parsiux init --ci --target .
+```
+
+این دستور دو فایل می‌سازد:
+
+```text
+parsiux.config.json
+.github/workflows/parsiux-guardian.yml
+```
+
+نمونه‌ی config تولیدشده:
+
+```json
+{
+  "profile": "base-fa",
+  "staticTarget": ".",
+  "visualTarget": "http://localhost:3000",
+  "baseline": ".parsiux/baselines/homepage",
+  "output": "parsiux-gate-report",
+  "maxDifference": 0.01
+}
+```
+
+بعد از آماده‌بودن dev server:
+
+```bash
+parsiux gate --config parsiux.config.json --strict
+```
+
+در GitHub Actions از `--github` استفاده کن تا warning و errorها به annotation تبدیل شوند و summary فارسی در صفحه‌ی اجرای Action نوشته شود:
+
+```bash
+parsiux gate --config parsiux.config.json --github --strict
+```
+
+workflow تولیدشده برای استفاده‌ی بدون npm publish، نسخه‌ی اصلی ParsiUX را clone می‌کند، پروژه را روی پورت 3000 منتظر می‌ماند، Chromium را نصب می‌کند و artifactهای `parsiux-gate-report` را نگه می‌دارد. اگر start command یا پورت پروژه متفاوت است، همان دو خط workflow و `visualTarget` را متناسب با پروژه تغییر بده.
+
+### Rule Packها
+
+```bash
+parsiux profiles
+```
+
+| Profile | کاربرد |
+| --- | --- |
+| `base-fa` | RTL، متن فارسی، bidi، فونت و logical CSS |
+| `ecommerce-fa` | قیمت، تومان/ریال، خرید، موجودی و checkout |
+| `fintech-fa` | مبلغ، شناسه، داده‌ی حساس و isolation متن LTR |
+| `booking-fa` | فرم، زمان، ظرفیت و مسیر رزرو |
+| `dashboard-fa` | جدول، KPI، فیلتر و نمایش داده در RTL |
+| `healthcare-fa` | فرم حساس، consent و محتوای حریم خصوصی |
+
+### اصلاح امن RTL
+
+```bash
+parsiux fix .
+parsiux fix . --apply
+```
+
+حالت عادی فقط dry-run است. `--apply` صرفاً تبدیل‌های کم‌خطر مانند `margin-left` به `margin-inline-start`، `text-align: left` به `text-align: start` و کلاس‌های Tailwind مثل `ml-*` به `ms-*` را اعمال می‌کند. propertyهای موقعیت‌دهی مثل `left/right` عمداً خودکار تغییر نمی‌کنند، چون ممکن است قصد طراحی را عوض کنند.
+
 ## RTL Gallery
 
 مسیر [gallery/](gallery/) یک گالری فارسی و بدون وابستگی بیرونی است که نمونه‌های درست و غلط RTL را کنار هم نشان می‌دهد: مبلغ و bidi، filter chipهای موبایل، focus و target لمسی، فرم، order list و جدول responsive.
@@ -194,12 +263,12 @@ npm install
 npm run verify
 ```
 
-پروژه با TypeScript و Node استاندارد ساخته شده و وابستگی runtime ندارد. تست‌ها نرمال‌سازی فارسی، relevance جست‌وجو، تولید token و RTL audit را پوشش می‌دهند.
+پروژه با TypeScript، Playwright، pixelmatch و PNG diff ساخته شده است. تست‌ها نرمال‌سازی فارسی، relevance جست‌وجو، تولید token، rule packها، safe fix، RTL audit و regression report را پوشش می‌دهند.
 
 ## مسیر توسعه
 
-- baseline approval workflow برای PRها و نگه‌داری screenshotهای تأییدشده
-- rule packهای پرداخت، فروشگاه، محتوای فارسی و فرم‌های محلی
+- reusable GitHub Action برای نصب بدون clone در پروژه‌های دیگر
+- rule packهای عمیق‌تر برای پرداخت، فروشگاه، محتوای فارسی و فرم‌های محلی
 - adapterهای Nuxt، Flutter و React Native
 - galleryهای contribution-ready برای کامپوننت‌های بیشتر
 - corpus عمومی برای سنجش کیفیت جست‌وجوی فارسی
