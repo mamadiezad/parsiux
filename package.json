@@ -11,6 +11,7 @@
     "data",
     "templates",
     "README.md",
+    "CHANGELOG.md",
     "NOTICE.md"
   ],
   "scripts": {
@@ -37,6 +38,17 @@
     "accessibility"
   ],
   "author": "Mohammad (@llllxyz)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmdverse/parsiux.git"
+  },
+  "homepage": "https://github.com/mmdverse/parsiux#readme",
+  "bugs": {
+    "url": "https://github.com/mmdverse/parsiux/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },
