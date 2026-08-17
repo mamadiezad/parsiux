@@ -22,7 +22,7 @@ ParsiUX به‌جای ترجمه‌ی سطحی یک design system انگلیسی
 تا زمان انتشار نخستین نسخه در npm، پروژه را مستقیم از GitHub نصب کن:
 
 ```bash
-git clone https://github.com/mamadiezad/parsiux.git
+git clone https://github.com/mmdverse/parsiux.git
 cd parsiux
 npm install
 npm run build
