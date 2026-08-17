@@ -1,6 +1,6 @@
 {
   "name": "parsiux",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Persian-first UI/UX intelligence and RTL audit CLI for AI coding assistants",
   "type": "module",
   "bin": {

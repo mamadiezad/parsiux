@@ -1,5 +1,15 @@
 # تغییرات ParsiUX
 
+## v0.1.1 — ۱۷ اوت ۲۰۲۶
+
+انتشار maintenance برای کامل‌کردن distribution عمومی.
+
+- انتشار رسمی `parsiux@0.1.0` روی npm
+- تغییر راهنمای نصب به `npm install -g parsiux`
+- تکمیل metadata npm شامل repository، homepage و bugs URL
+- اضافه‌شدن workflow انتشار مبتنی بر npm Trusted Publishing و GitHub Actions OIDC
+- انتشارهای بعدی بدون npm token دائمی و با provenance انجام می‌شوند
+
 ## v0.1.0 — ۱۷ اوت ۲۰۲۶
 
 اولین انتشار عمومی ParsiUX.
